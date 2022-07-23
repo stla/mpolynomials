@@ -14,22 +14,18 @@ module MultiPol
   , (^**^)
   -- , derivPoly
   -- , monom
-  -- , evalPoly
+  , evalPoly
   -- , polytest 
   )
   where
 import qualified Algebra.Additive as AlgAdd
 import qualified Algebra.Field    as AlgField
 import qualified Algebra.Ring     as AlgRing
-import           Data.List ( sortBy, groupBy )
-import           Data.Function ( on )
+import           Data.List        ( sortBy, groupBy )
+import           Data.Function    ( on )
 import qualified Data.Sequence    as S
 import           Data.Sequence    (Seq, elemIndexL, (!?), adjust', findIndexL, (><))
 import           Data.Foldable    (toList)
-
-
--- data Polynomial a where
---   M :: AlgField.C a => Monomial a
 
 data Monomial a = Monomial 
   { 
@@ -163,6 +159,21 @@ simplifiedListOfMonomials pol = map (foldl1 addMonomials) groups
 toCanonicalForm :: (AlgField.C a, Eq a) => Polynomial a -> Polynomial a
 toCanonicalForm = fromListOfMonomials . simplifiedListOfMonomials
 
+evalMonomial :: (AlgField.C a, Eq a) => [a] -> Monomial a -> a
+evalMonomial xyz monomial =
+  coefficient monomial AlgRing.* AlgRing.product (zipWith (AlgRing.^) xyz pows)
+  where
+    pows = toList (fromIntegral <$> powers monomial)
+
+-- | evaluates a polynomial
+evalPoly :: (AlgField.C a, Eq a) => Polynomial a -> [a] -> a
+evalPoly pol xyz = case pol of
+  Zero -> AlgAdd.zero
+  M mono -> evalMonomial xyz mono
+  p :+: q -> evalPoly p xyz AlgAdd.+ evalPoly q xyz
+  p :*: q -> evalPoly p xyz AlgRing.* evalPoly q xyz
+
+
 
 -- zero :: (AlgField.C a, Eq a) => Int -> Polynomial a
 -- zero n = M Monomial { coefficient = 0, powers = S.replicate n 0 }
@@ -221,24 +232,14 @@ toCanonicalForm = fromListOfMonomials . simplifiedListOfMonomials
 -- monom :: (AlgField.C a, Eq a) => a -> [Int] -> Monomial a
 -- monom coef pows = Monomial coef (S.fromList pows)
 
--- evalMonomial :: (AlgField.C a, Eq a) => [a] -> Monomial a -> a
--- evalMonomial xyz monomial =
---   coefficient monomial * product (zipWith (^) xyz pows)
---   where
---     pows = toList (powers monomial)
+
 
 -- evalPol :: (AlgField.C a, Eq a) => Polynomial a -> [a] -> a
 -- evalPol pol xyz = sum (map (evalMonomial xyz) monomials)
 --   where
 --     monomials = toListOfMonomials pol
 
--- -- | evaluates a polynomial
--- evalPoly :: (AlgField.C a, Eq a) => Polynomial a -> [a] -> a
--- evalPoly pol xyz = case pol of
---   Zero -> 0
---   M mono -> evalMonomial xyz mono
---   p :+: q -> evalPoly p xyz + evalPoly q xyz
---   p :*: q -> evalPoly p xyz * evalPoly q xyz
+
 
 -- evalFromListOfMonomials :: [Monomial] -> (Double, Double, Double) -> Double
 -- evalFromListOfMonomials monomials xyz = sum (map (evalMonomial xyz) monomials)

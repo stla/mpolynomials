@@ -20,7 +20,7 @@ Alternatively, one can use the algebraic instances of the polynomials:
 ```haskell
 import qualified Algebra.Additive as AA
 import qualified Algebra.Ring as AR
-(2 *^ x AR.* x AR.* x AR.* y AR.* z AA.+ x AR.* x) AR.* (4 *^ x AR.* y AR.* z) 
+(2 *^ (x AR.^ 3) AR.* y AR.* z AA.+ x AR.* x) AR.* (4 *^ x AR.* y AR.* z) 
 -- M (Monomial {coefficient = 4.0, powers = fromList [3,1,1]}) 
 -- :+: 
 -- M (Monomial {coefficient = 8.0, powers = fromList [4,2,2]})
@@ -42,12 +42,15 @@ z = lone 3 3 :: Polynomial Rational
 -- M (Monomial {coefficient = 7 % 6, powers = fromList [4,2,2]})
 ```
 
-___
-
-TODO:
+Evaluation:
 
 ```haskell
-> -- evaluate poly at x=2, y=1, z=2
-> evalPoly poly [2, 1, 2]
-720.0
+import MultiPol
+x = lone 3 1 :: Polynomial Double
+y = lone 3 2 :: Polynomial Double
+z = lone 3 3 :: Polynomial Double
+poly = 2 *^ x ^*^ y ^*^ z 
+-- evaluate poly at x=2, y=1, z=2
+evalPoly poly [2, 1, 2]
+-- 8.0
 ```
