@@ -12,7 +12,7 @@ ___
 > poly
 (M (Monomial {coefficient = 2.0, powers = fromList [3, 1, 1]}) :+:
  M (Monomial {coefficient = 1.0, powers = fromList [2, 0, 0]})) :*:
- M (Monomial {coefficient = 5.0, powers = fromList [1, 1, 1]})
+M (Monomial {coefficient = 5.0, powers = fromList [1, 1, 1]})
 
 > -- multiply by a scalar
 > 2 *^ poly
