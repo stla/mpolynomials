@@ -24,7 +24,7 @@ import qualified Algebra.Ring     as AlgRing
 import           Data.List ( sortBy, groupBy )
 import           Data.Function ( on )
 import qualified Data.Sequence    as S
-import           Data.Sequence    (Seq, elemIndexL, (!?), adjust', findIndexL)
+import           Data.Sequence    (Seq, elemIndexL, (!?), adjust', findIndexL, (><))
 import           Data.Foldable    (toList)
 
 
@@ -107,21 +107,45 @@ lone n i = M (Monomial AlgRing.one pows)
     nzeros = S.replicate n AlgAdd.zero
     pows = S.update (i - 1) AlgRing.one nzeros
 
+growSequence :: Seq Int -> Int -> Seq Int 
+growSequence s n = s >< t
+  where 
+    m = S.length s 
+    t = S.replicate (n - m) 0
+ 
+grow :: Int -> Monomial a -> Monomial a
+grow n monom = Monomial (coefficient monom) (growSequence (powers monom) n)
+
+nvariables :: Monomial a -> Int
+nvariables monom = S.length $ powers monom
 
 -- | build a polynomial from a list of monomials
 fromListOfMonomials :: (AlgField.C a, Eq a) => [Monomial a] -> Polynomial a
 fromListOfMonomials ms = if null ms
                             then Zero
                             else foldl1 (:+:) (map M ms)
+  -- where
+  --   n = maximum (map nvariables ms)
+  --   ms' = map (grow n) ms
+
+multMonomial :: (AlgField.C a, Eq a) => Monomial a -> Monomial a -> Monomial a
+multMonomial (Monomial ca powsa) (Monomial cb powsb) =
+  Monomial (ca AlgRing.* cb) (S.zipWith (+) powsa' powsb')
+  where
+    n = max (S.length powsa) (S.length powsb)
+    powsa' = growSequence powsa n
+    powsb' = growSequence powsb n
 
 -- | polynomial to list of monomials
 toListOfMonomials :: (AlgField.C a, Eq a) => Polynomial a -> [Monomial a]
 toListOfMonomials pol = case pol of
   Zero -> []
   M monomial -> if coefficient monomial == AlgAdd.zero then [] else [monomial]
-  p :+: q -> toListOfMonomials p ++ toListOfMonomials q
-  p :*: q -> [multMonomial monoa monob | monoa <- toListOfMonomials p,
-                                         monob <- toListOfMonomials q]
+  p :+: q -> harmonize $ toListOfMonomials p ++ toListOfMonomials q
+  p :*: q -> harmonize $ [multMonomial monoa monob | monoa <- toListOfMonomials p,
+                                                     monob <- toListOfMonomials q]
+  where
+    harmonize ms = map (grow (maximum (map nvariables ms))) ms
 
 -- | polynomial to list of monomials, grouping the monomials with same powers
 simplifiedListOfMonomials :: (AlgField.C a, Eq a) => Polynomial a -> [Monomial a]
@@ -167,9 +191,6 @@ toCanonicalForm = fromListOfMonomials . simplifiedListOfMonomials
 -- derivMonomial' :: Monomial -> [Int] -> Polynomial
 -- derivMonomial' mono vars = derivMonomial mono (S.fromList vars)
 
-multMonomial :: (AlgField.C a, Eq a) => Monomial a -> Monomial a -> Monomial a
-multMonomial (Monomial ca powsa) (Monomial cb powsb) =
-  Monomial (ca AlgRing.* cb) (S.zipWith (+) powsa powsb)
 
 
 
@@ -196,9 +217,9 @@ multMonomial (Monomial ca powsa) (Monomial cb powsb) =
 
 
 
--- | convenient built of a monomial
-monom :: (AlgField.C a, Eq a) => a -> [Int] -> Monomial a
-monom coef pows = Monomial coef (S.fromList pows)
+-- -- | convenient built of a monomial
+-- monom :: (AlgField.C a, Eq a) => a -> [Int] -> Monomial a
+-- monom coef pows = Monomial coef (S.fromList pows)
 
 -- evalMonomial :: (AlgField.C a, Eq a) => [a] -> Monomial a -> a
 -- evalMonomial xyz monomial =

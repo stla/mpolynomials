@@ -52,3 +52,5 @@ M (Monomial {coefficient = 5.0, powers = fromList [1, 1, 1]})
 > toCanonicalForm $ derivPoly poly [2, 1, 0]
 M (Monomial {coefficient = 60.0, powers = fromList [2, 1, 2]})
 ```
+
+[1, ..]
