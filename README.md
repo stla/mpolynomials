@@ -5,11 +5,15 @@ Simple multivariate polynomials in Haskell
 ___
 
 ```haskell
-> import MultiPol
+import MultiPol
 
-> -- a polynomial for illustration
-> poly = (M (monom 2.0 [3, 1, 1]) :+: M (monom 1.0 [2, 0, 0])) :*: M (monom 5.0 [1, 1, 1])
-> poly
+-- a polynomial for illustration
+x = lone 3 1 :: Polynomial Double
+y = lone 3 2 :: Polynomial Double
+z = lone 3 3 :: Polynomial Double
+poly = 2 *^ (x^**^3 ^*^ y ^*^ z)
+poly = (M (monom 2.0 [3, 1, 1]) :+: M (monom 1.0 [2, 0, 0])) :*: M (monom 5.0 [1, 1, 1])
+poly
 (M (Monomial {coefficient = 2.0, powers = fromList [3, 1, 1]}) :+:
  M (Monomial {coefficient = 1.0, powers = fromList [2, 0, 0]})) :*:
 M (Monomial {coefficient = 5.0, powers = fromList [1, 1, 1]})
