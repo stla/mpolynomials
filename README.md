@@ -11,12 +11,13 @@ import MultiPol
 x = lone 3 1 :: Polynomial Double
 y = lone 3 2 :: Polynomial Double
 z = lone 3 3 :: Polynomial Double
-poly = 2 *^ (x^**^3 ^*^ y ^*^ z)
-poly = (M (monom 2.0 [3, 1, 1]) :+: M (monom 1.0 [2, 0, 0])) :*: M (monom 5.0 [1, 1, 1])
-poly
-(M (Monomial {coefficient = 2.0, powers = fromList [3, 1, 1]}) :+:
- M (Monomial {coefficient = 1.0, powers = fromList [2, 0, 0]})) :*:
-M (Monomial {coefficient = 5.0, powers = fromList [1, 1, 1]})
+(2 *^ (x^**^3 ^*^ y ^*^ z) ^+^ (x^**^2)) ^*^ (4 *^ x ^*^ y ^*^ z)
+-- M (Monomial {coefficient = 5.0, powers = fromList [3,1,1]}) 
+-- :+: 
+-- M (Monomial {coefficient = 8.0, powers = fromList [4,2,2]})
+___________________________________________________________________
+
+(2 *^ x AR.* x AR.* x AR.* y AR.* z AA.+ x AR.* x) AR.* (4 *^ x AR.* y AR.* z) 
 
 > -- multiply by a scalar
 > 2 *^ poly

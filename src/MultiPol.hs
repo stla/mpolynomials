@@ -49,6 +49,9 @@ instance (AlgField.C a, Eq a) => AlgAdd.C (Polynomial a) where
   p + q = p ^+^ q
   zero = Zero
   negate = negatePol
+-- instance (AlgField.C a, Eq a) => AlgRing.C (Polynomial a) where
+--   p * q = p ^*^ q
+--   one = M (Monomial AlgRing.one ) 
 
 (^+^) :: (AlgField.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
 (^+^) p q = toCanonicalForm $ p :+: q
@@ -132,7 +135,7 @@ simplifiedListOfMonomials pol = map (foldl1 addMonomials) groups
                               , powers = powers monoa
                               }
 
--- | canonical form of a polynomial (sum of monomials)
+-- | canonical form of a polynomial (sum of monomials with distinct powers)
 toCanonicalForm :: (AlgField.C a, Eq a) => Polynomial a -> Polynomial a
 toCanonicalForm = fromListOfMonomials . simplifiedListOfMonomials
 
