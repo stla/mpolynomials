@@ -49,9 +49,9 @@ instance (AlgField.C a, Eq a) => AlgAdd.C (Polynomial a) where
   p + q = p ^+^ q
   zero = Zero
   negate = negatePol
--- instance (AlgField.C a, Eq a) => AlgRing.C (Polynomial a) where
---   p * q = p ^*^ q
---   one = M (Monomial AlgRing.one ) 
+instance (AlgField.C a, Eq a) => AlgRing.C (Polynomial a) where
+  p * q = p ^*^ q
+  one = lone 0 0 
 
 (^+^) :: (AlgField.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
 (^+^) p q = toCanonicalForm $ p :+: q
