@@ -15,7 +15,7 @@ z = lone 3 3 :: Polynomial Double
 -- M (Monomial {coefficient = 8.0, powers = fromList [4,2,2]})
 ```
 
-Alternatively, one can use the algebraic instance of the polynomials:
+Alternatively, one can use the algebraic instances of the polynomials:
 
 ```haskell
 import qualified Algebra.Additive as AA
