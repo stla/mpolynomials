@@ -1,8 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-module MultiPol
+module MultiPol2
   ( Polynomial() 
   , CompactPolynomial()
   , compact
@@ -29,7 +28,7 @@ import qualified Algebra.Ring     as AlgRing
 import           Data.List        ( sortBy, groupBy )
 import           Data.Function    ( on )
 import qualified Data.Sequence    as S
-import           Data.Sequence    (Seq, elemIndexL, (!?), adjust', findIndexL, (><))
+import           Data.Sequence    (Seq, (><), (|>))
 import           Data.Foldable    (toList)
 import           Data.Tuple.Extra ((&&&))
 
@@ -48,19 +47,28 @@ data Polynomial a = Zero
 instance (AlgRing.C a, Eq a) => Eq (Polynomial a) where
   p == q = map coefficient (toListOfMonomials $ p ^-^ q) == mempty
 instance (AlgRing.C a, Eq a) => AlgAdd.C (Polynomial a) where
-  p + q = p ^+^ q
+  p + q = addPolys p q
   zero = Zero
   negate = negatePol
 instance (AlgRing.C a, Eq a) => AlgMod.C a (Polynomial a) where
-  p *> q = p *^ q
+  lambda *> p = scalePol lambda p
 instance (AlgRing.C a, Eq a) => AlgRing.C (Polynomial a) where
-  p * q = p ^*^ q
-  one = lone 0 0 
+  p * q = multiplyPols p q
+  one = lone 0
 
 newtype CompactPolynomial a = Compact (Polynomial a)
-  deriving (Eq, AlgAdd.C, AlgMod.C a, AlgRing.C)
+  deriving (Eq)
 instance (Eq a, Show a, AlgRing.C a) => Show (CompactPolynomial a) where
   show p = show $ map (coefficient &&& (toList . powers)) (toListOfMonomials $ fromCompact p)
+instance (AlgRing.C a, Eq a) => AlgAdd.C (CompactPolynomial a) where
+  p + q = compact $ fromCompact p ^+^ fromCompact q
+  zero = compact Zero
+  negate = compact . negatePol . fromCompact
+instance (AlgRing.C a, Eq a) => AlgMod.C a (CompactPolynomial a) where
+  lambda *> p = compact $ lambda *^ fromCompact p
+instance (AlgRing.C a, Eq a) => AlgRing.C (CompactPolynomial a) where
+  p * q = compact $ fromCompact p ^*^ fromCompact q
+  one = compact $ lone 0
 
 fromCompact :: CompactPolynomial a -> Polynomial a
 fromCompact (Compact p) = p 
@@ -68,8 +76,12 @@ fromCompact (Compact p) = p
 compact :: Polynomial a -> CompactPolynomial a
 compact = Compact  
 
+addPolys :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
+addPolys p q = toCanonicalForm $ p :+: q
+
+-- | addition two polynomials
 (^+^) :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
-(^+^) p q = toCanonicalForm $ p :+: q
+(^+^) p q = p AlgAdd.+ q
 
 negatePol :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a
 negatePol pol = case pol of 
@@ -83,44 +95,54 @@ negatePol pol = case pol of
       powers = powers monomial
     }
 
+-- | substraction
 (^-^) :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
-(^-^) p q = p ^+^ negatePol q
+(^-^) p q = p AlgAdd.- q
+
+multiplyPols :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
+multiplyPols p q = toCanonicalForm $ p :*: q
 
 -- | multiply two polynomials
 (^*^) :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
-(^*^) p q = toCanonicalForm $ p :*: q
+(^*^) p q = p AlgRing.* q
 
 -- | power of a polynomial
 (^**^) :: (AlgRing.C a, Eq a) => Polynomial a -> Int -> Polynomial a
 (^**^) p n = foldl1 (^*^) (replicate n p) 
 
--- | scale polynomial by a scalar
-(*^) :: (AlgRing.C a, Eq a) => a -> Polynomial a -> Polynomial a
-(*^) lambda pol = if lambda == AlgAdd.zero
+scalePol :: (AlgRing.C a, Eq a) => a -> Polynomial a -> Polynomial a
+scalePol lambda pol = if lambda == AlgAdd.zero
   then Zero 
   else case pol of
     Zero -> Zero 
     M monomial -> M (scaleMonomial monomial)
     p :+: q -> if p /= Zero && q /= Zero
-      then (*^) lambda p ^+^ (*^) lambda q
+      then scalePol lambda p ^+^ scalePol lambda q
       else if p == Zero
-        then (*^) lambda q
-        else (*^) lambda p
+        then scalePol lambda q
+        else scalePol lambda p
     p :*: q -> if p == Zero || q == Zero
       then Zero
-      else (*^) lambda p ^*^ q
+      else scalePol lambda p ^*^ q
   where
     scaleMonomial monomial = Monomial {
                                 coefficient = lambda AlgRing.* coefficient monomial
                               , powers = powers monomial
                              }
 
+-- | scale polynomial by a scalar
+(*^) :: (AlgRing.C a, Eq a) => a -> Polynomial a -> Polynomial a
+(*^) lambda pol = lambda AlgMod.*> pol 
+
 -- | variable x_i
-lone :: (AlgRing.C a, Eq a) => Int -> Int -> Polynomial a
-lone n i = M (Monomial AlgRing.one pows)
+lone :: (AlgRing.C a, Eq a) => Int -> Polynomial a
+lone n = M (Monomial AlgRing.one pows)
   where
-    nzeros = S.replicate n AlgAdd.zero
-    pows = S.update (i - 1) AlgRing.one nzeros
+    pows = if n == 0 
+      then 
+        S.empty 
+      else 
+        S.replicate (n - 1) AlgAdd.zero |> AlgRing.one
 
 growSequence :: Seq Int -> Int -> Seq Int 
 growSequence s n = s >< t
