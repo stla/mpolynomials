@@ -1,8 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 module MultiPol
   ( Polynomial() 
   , CompactPolynomial()
+  , compact
   -- , Monomial
   , lone
   -- , toListOfMonomials
@@ -21,6 +24,7 @@ module MultiPol
   )
   where
 import qualified Algebra.Additive as AlgAdd
+import qualified Algebra.Module   as AlgMod
 import qualified Algebra.Ring     as AlgRing
 import           Data.List        ( sortBy, groupBy )
 import           Data.Function    ( on )
@@ -48,17 +52,22 @@ instance (AlgRing.C a, Eq a) => AlgAdd.C (Polynomial a) where
   p + q = p ^+^ q
   zero = Zero
   negate = negatePol
+instance (AlgRing.C a, Eq a) => AlgMod.C a (Polynomial a) where
+  p *> q = p *^ q
 instance (AlgRing.C a, Eq a) => AlgRing.C (Polynomial a) where
   p * q = p ^*^ q
   one = lone 0 0 
 
 newtype CompactPolynomial a = Compact (Polynomial a)
-  deriving (Eq, AlgAdd.C, AlgRing.C)
+  deriving (Eq, AlgAdd.C, AlgMod.C a, AlgRing.C)
 instance (Eq a, Show a, AlgRing.C a) => Show (CompactPolynomial a) where
   show p = show $ map (coefficient &&& (toList . powers)) (toListOfMonomials $ fromCompact p)
 
 fromCompact :: CompactPolynomial a -> Polynomial a
 fromCompact (Compact p) = p 
+
+compact :: Polynomial a -> CompactPolynomial a
+compact = Compact  
 
 (^+^) :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
 (^+^) p q = toCanonicalForm $ p :+: q

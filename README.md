@@ -19,8 +19,9 @@ Alternatively, one can use the algebraic instances of the polynomials:
 
 ```haskell
 import qualified Algebra.Additive as AA
-import qualified Algebra.Ring as AR
-(2 *^ (x AR.^ 3) AR.* y AR.* z AA.+ x AR.* x) AR.* (4 *^ x AR.* y AR.* z) 
+import qualified Algebra.Module   as AM
+import qualified Algebra.Ring     as AR
+(2 AM.*> (x AR.^ 3) AR.* y AR.* z AA.+ x AR.* x) AR.* (4 AM.*> x AR.* y AR.* z) 
 -- M (Monomial {coefficient = 4.0, powers = fromList [3,1,1]}) 
 -- :+: 
 -- M (Monomial {coefficient = 8.0, powers = fromList [4,2,2]})
@@ -63,6 +64,23 @@ poly ^*^ poly
 --  M (Monomial {
 --    coefficient = M (Monomial {coefficient = 1.0, powers = fromList [2,0]}), 
 --    powers = fromList [2,0]})
+```
+
+Compact version:
+
+```haskell
+import MultiPol
+import qualified Algebra.Additive as AA
+import qualified Algebra.Module   as AM
+import qualified Algebra.Ring     as AR
+p = compact (lone 1 1) :: CompactPolynomial Double
+x = compact (lone 2 1) :: CompactPolynomial (CompactPolynomial Double)
+y = compact (lone 2 2) :: CompactPolynomial (CompactPolynomial Double)
+poly = (p AM.*> x) AA.+ (p AM.*> y) 
+poly
+-- [([(1.0, [1])], [0, 1]), ([(1.0, [1])], [1, 0])]
+poly AR.* poly
+-- [([(1.0, [2])], [0, 2]), ([(2.0, [2])], [1, 1]), ([(1.0, [2])], [2, 0])]
 ```
 
 Evaluation:
