@@ -54,3 +54,24 @@ poly = 2 *^ x ^*^ y ^*^ z
 evalPoly poly [2, 1, 2]
 -- 8.0
 ```
+
+```haskell
+import MultiPol
+p = lone 2 1 :: Polynomial Double
+q = lone 2 2 :: Polynomial Double
+x = lone 2 1 :: Polynomial (Polynomial Double)
+y = lone 2 2 :: Polynomial (Polynomial Double)
+poly = (p *^ x) ^+^ (q *^ y)  
+poly ^*^ poly
+-- (M (Monomial {
+--   coefficient = M (Monomial {coefficient = 1.0, powers = fromList [0,2]}), 
+--   powers = fromList [0,2]}) 
+-- :+: 
+--  M (Monomial {
+--    coefficient = M (Monomial {coefficient = 2.0, powers = fromList [1,1]}), 
+--    powers = fromList [1,1]})) 
+-- :+: 
+--  M (Monomial {
+--    coefficient = M (Monomial {coefficient = 1.0, powers = fromList [2,0]}), 
+--    powers = fromList [2,0]})
+```

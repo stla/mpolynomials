@@ -19,7 +19,6 @@ module MultiPol
   )
   where
 import qualified Algebra.Additive as AlgAdd
-import qualified Algebra.Field    as AlgField
 import qualified Algebra.Ring     as AlgRing
 import           Data.List        ( sortBy, groupBy )
 import           Data.Function    ( on )
@@ -39,44 +38,44 @@ data Polynomial a = Zero
                   | Polynomial a :+: Polynomial a
                   | Polynomial a :*: Polynomial a
                     deriving (Show)
-instance (AlgField.C a, Eq a) => Eq (Polynomial a) where
+instance (AlgRing.C a, Eq a) => Eq (Polynomial a) where
   p == q = map coefficient (toListOfMonomials $ p ^-^ q) == mempty
-instance (AlgField.C a, Eq a) => AlgAdd.C (Polynomial a) where
+instance (AlgRing.C a, Eq a) => AlgAdd.C (Polynomial a) where
   p + q = p ^+^ q
   zero = Zero
   negate = negatePol
-instance (AlgField.C a, Eq a) => AlgRing.C (Polynomial a) where
+instance (AlgRing.C a, Eq a) => AlgRing.C (Polynomial a) where
   p * q = p ^*^ q
   one = lone 0 0 
 
-(^+^) :: (AlgField.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
+(^+^) :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
 (^+^) p q = toCanonicalForm $ p :+: q
 
-negatePol :: (AlgField.C a, Eq a) => Polynomial a -> Polynomial a
+negatePol :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a
 negatePol pol = case pol of 
   Zero -> Zero
   M monomial -> M (negateMonomial monomial)
   pol -> fromListOfMonomials (map negateMonomial (toListOfMonomials pol))
   where
-    negateMonomial :: forall a1. (AlgField.C a1, Eq a1) => Monomial a1 -> Monomial a1
+    negateMonomial :: forall a1. (AlgRing.C a1, Eq a1) => Monomial a1 -> Monomial a1
     negateMonomial monomial = Monomial { 
       coefficient = AlgAdd.negate (coefficient monomial), 
       powers = powers monomial
     }
 
-(^-^) :: (AlgField.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
+(^-^) :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
 (^-^) p q = p ^+^ negatePol q
 
 -- | multiply two polynomials
-(^*^) :: (AlgField.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
+(^*^) :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
 (^*^) p q = toCanonicalForm $ p :*: q
 
 -- | power of a polynomial
-(^**^) :: (AlgField.C a, Eq a) => Polynomial a -> Int -> Polynomial a
+(^**^) :: (AlgRing.C a, Eq a) => Polynomial a -> Int -> Polynomial a
 (^**^) p n = foldl1 (^*^) (replicate n p) 
 
 -- | scale polynomial by a scalar
-(*^) :: (AlgField.C a, Eq a) => a -> Polynomial a -> Polynomial a
+(*^) :: (AlgRing.C a, Eq a) => a -> Polynomial a -> Polynomial a
 (*^) lambda pol = if lambda == AlgAdd.zero
   then Zero 
   else case pol of
@@ -97,7 +96,7 @@ negatePol pol = case pol of
                              }
 
 -- | variable x_i
-lone :: (AlgField.C a, Eq a) => Int -> Int -> Polynomial a
+lone :: (AlgRing.C a, Eq a) => Int -> Int -> Polynomial a
 lone n i = M (Monomial AlgRing.one pows)
   where
     nzeros = S.replicate n AlgAdd.zero
@@ -116,7 +115,7 @@ nvariables :: Monomial a -> Int
 nvariables monom = S.length $ powers monom
 
 -- | build a polynomial from a list of monomials
-fromListOfMonomials :: (AlgField.C a, Eq a) => [Monomial a] -> Polynomial a
+fromListOfMonomials :: (AlgRing.C a, Eq a) => [Monomial a] -> Polynomial a
 fromListOfMonomials ms = if null ms
                             then Zero
                             else foldl1 (:+:) (map M ms)
@@ -124,7 +123,7 @@ fromListOfMonomials ms = if null ms
   --   n = maximum (map nvariables ms)
   --   ms' = map (grow n) ms
 
-multMonomial :: (AlgField.C a, Eq a) => Monomial a -> Monomial a -> Monomial a
+multMonomial :: (AlgRing.C a, Eq a) => Monomial a -> Monomial a -> Monomial a
 multMonomial (Monomial ca powsa) (Monomial cb powsb) =
   Monomial (ca AlgRing.* cb) (S.zipWith (+) powsa' powsb')
   where
@@ -133,7 +132,7 @@ multMonomial (Monomial ca powsa) (Monomial cb powsb) =
     powsb' = growSequence powsb n
 
 -- | polynomial to list of monomials
-toListOfMonomials :: (AlgField.C a, Eq a) => Polynomial a -> [Monomial a]
+toListOfMonomials :: (AlgRing.C a, Eq a) => Polynomial a -> [Monomial a]
 toListOfMonomials pol = case pol of
   Zero -> []
   M monomial -> if coefficient monomial == AlgAdd.zero then [] else [monomial]
@@ -144,29 +143,29 @@ toListOfMonomials pol = case pol of
     harmonize ms = map (grow (maximum (map nvariables ms))) ms
 
 -- | polynomial to list of monomials, grouping the monomials with same powers
-simplifiedListOfMonomials :: (AlgField.C a, Eq a) => Polynomial a -> [Monomial a]
+simplifiedListOfMonomials :: (AlgRing.C a, Eq a) => Polynomial a -> [Monomial a]
 simplifiedListOfMonomials pol = map (foldl1 addMonomials) groups
   where
     groups = groupBy ((==) `on` powers)
              (sortBy (compare `on` powers) (toListOfMonomials pol))
-    addMonomials :: forall a1. (AlgField.C a1, Eq a1) => Monomial a1 -> Monomial a1 -> Monomial a1
+    addMonomials :: forall a1. (AlgRing.C a1, Eq a1) => Monomial a1 -> Monomial a1 -> Monomial a1
     addMonomials monoa monob = Monomial {
                                 coefficient = coefficient monoa AlgAdd.+ coefficient monob
                               , powers = powers monoa
                               }
 
 -- | canonical form of a polynomial (sum of monomials with distinct powers)
-toCanonicalForm :: (AlgField.C a, Eq a) => Polynomial a -> Polynomial a
+toCanonicalForm :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a
 toCanonicalForm = fromListOfMonomials . simplifiedListOfMonomials
 
-evalMonomial :: (AlgField.C a, Eq a) => [a] -> Monomial a -> a
+evalMonomial :: (AlgRing.C a, Eq a) => [a] -> Monomial a -> a
 evalMonomial xyz monomial =
   coefficient monomial AlgRing.* AlgRing.product (zipWith (AlgRing.^) xyz pows)
   where
     pows = toList (fromIntegral <$> powers monomial)
 
 -- | evaluates a polynomial
-evalPoly :: (AlgField.C a, Eq a) => Polynomial a -> [a] -> a
+evalPoly :: (AlgRing.C a, Eq a) => Polynomial a -> [a] -> a
 evalPoly pol xyz = case pol of
   Zero -> AlgAdd.zero
   M mono -> evalMonomial xyz mono
@@ -175,7 +174,7 @@ evalPoly pol xyz = case pol of
 
 
 
--- zero :: (AlgField.C a, Eq a) => Int -> Polynomial a
+-- zero :: (AlgRing.C a, Eq a) => Int -> Polynomial a
 -- zero n = M Monomial { coefficient = 0, powers = S.replicate n 0 }
 
 -- derivMonomial :: Monomial -> Seq Int -> Polynomial
@@ -229,12 +228,12 @@ evalPoly pol xyz = case pol of
 
 
 -- -- | convenient built of a monomial
--- monom :: (AlgField.C a, Eq a) => a -> [Int] -> Monomial a
+-- monom :: (AlgRing.C a, Eq a) => a -> [Int] -> Monomial a
 -- monom coef pows = Monomial coef (S.fromList pows)
 
 
 
--- evalPol :: (AlgField.C a, Eq a) => Polynomial a -> [a] -> a
+-- evalPol :: (AlgRing.C a, Eq a) => Polynomial a -> [a] -> a
 -- evalPol pol xyz = sum (map (evalMonomial xyz) monomials)
 --   where
 --     monomials = toListOfMonomials pol
