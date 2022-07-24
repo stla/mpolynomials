@@ -1,6 +1,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module MultiPol
   ( Polynomial() 
+  , CompactPolynomial()
   -- , Monomial
   , lone
   -- , toListOfMonomials
@@ -25,6 +27,8 @@ import           Data.Function    ( on )
 import qualified Data.Sequence    as S
 import           Data.Sequence    (Seq, elemIndexL, (!?), adjust', findIndexL, (><))
 import           Data.Foldable    (toList)
+import           Data.Tuple.Extra ((&&&))
+import Algebra.Laws (identity)
 
 data Monomial a = Monomial 
   { 
@@ -47,6 +51,14 @@ instance (AlgRing.C a, Eq a) => AlgAdd.C (Polynomial a) where
 instance (AlgRing.C a, Eq a) => AlgRing.C (Polynomial a) where
   p * q = p ^*^ q
   one = lone 0 0 
+
+newtype CompactPolynomial a = Compact (Polynomial a)
+  deriving (Eq, AlgAdd.C, AlgRing.C)
+instance (Eq a, Show a, AlgRing.C a) => Show (CompactPolynomial a) where
+  show p = show $ map (coefficient &&& (toList . powers)) (toListOfMonomials $ fromCompact p)
+
+fromCompact :: CompactPolynomial a -> Polynomial a
+fromCompact (Compact p) = p 
 
 (^+^) :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
 (^+^) p q = toCanonicalForm $ p :+: q

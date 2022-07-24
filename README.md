@@ -42,18 +42,7 @@ z = lone 3 3 :: Polynomial Rational
 -- M (Monomial {coefficient = 7 % 6, powers = fromList [4,2,2]})
 ```
 
-Evaluation:
-
-```haskell
-import MultiPol
-x = lone 3 1 :: Polynomial Double
-y = lone 3 2 :: Polynomial Double
-z = lone 3 3 :: Polynomial Double
-poly = 2 *^ x ^*^ y ^*^ z 
--- evaluate poly at x=2, y=1, z=2
-evalPoly poly [2, 1, 2]
--- 8.0
-```
+Or `a = Polynomial Double`:
 
 ```haskell
 import MultiPol
@@ -75,3 +64,17 @@ poly ^*^ poly
 --    coefficient = M (Monomial {coefficient = 1.0, powers = fromList [2,0]}), 
 --    powers = fromList [2,0]})
 ```
+
+Evaluation:
+
+```haskell
+import MultiPol
+x = lone 3 1 :: Polynomial Double
+y = lone 3 2 :: Polynomial Double
+z = lone 3 3 :: Polynomial Double
+poly = 2 *^ x ^*^ y ^*^ z 
+-- evaluate poly at x=2, y=1, z=2
+evalPoly poly [2, 1, 2]
+-- 8.0
+```
+
