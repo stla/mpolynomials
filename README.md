@@ -77,9 +77,9 @@ p = compact (lone 1 1) :: CompactPolynomial Double
 x = compact (lone 2 1) :: CompactPolynomial (CompactPolynomial Double)
 y = compact (lone 2 2) :: CompactPolynomial (CompactPolynomial Double)
 poly = (p AM.*> x) AA.+ (p AM.*> y) 
-poly
+poly           -- ax + ay
 -- [([(1.0, [1])], [0, 1]), ([(1.0, [1])], [1, 0])]
-poly AR.* poly
+poly AR.* poly -- a²x² + 2a²xy + a²y²
 -- [([(1.0, [2])], [0, 2]), ([(2.0, [2])], [1, 1]), ([(1.0, [2])], [2, 0])]
 ```
 
