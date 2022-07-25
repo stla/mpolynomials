@@ -9,17 +9,11 @@ module MultiPol
   , lone
   , constant
   , terms
-  -- , toListOfMonomials
-  -- , simplifiedListOfMonomials
-  -- , fromListOfMonomials
-  -- , toCanonicalForm
   , (*^)
   , (^+^)
   , (^-^)
   , (^*^)
   , (^**^)
-  -- , derivPoly
-  -- , monom
   , evalPoly
   , prettyPol
   , polytest 
@@ -83,7 +77,7 @@ compact = Compact
 addPolys :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
 addPolys p q = toCanonicalForm $ p :+: q
 
--- | addition two polynomials
+-- | Addition of two polynomials
 (^+^) :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
 (^+^) p q = p AlgAdd.+ q
 
@@ -99,18 +93,18 @@ negatePol pol = case pol of
       powers = powers monomial
     }
 
--- | substraction
+-- | Substraction
 (^-^) :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
 (^-^) p q = p AlgAdd.- q
 
 multiplyPols :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
 multiplyPols p q = toCanonicalForm $ p :*: q
 
--- | multiply two polynomials
+-- | Multiply two polynomials
 (^*^) :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
 (^*^) p q = p AlgRing.* q
 
--- | power of a polynomial
+-- | Power of a polynomial
 (^**^) :: (AlgRing.C a, Eq a) => Polynomial a -> Int -> Polynomial a
 (^**^) p n = foldl1 (^*^) (replicate n p) 
 
@@ -134,11 +128,11 @@ scalePol lambda pol = if lambda == AlgAdd.zero
                               , powers = powers monomial
                              }
 
--- | scale polynomial by a scalar
+-- | Scale polynomial by a scalar
 (*^) :: (AlgRing.C a, Eq a) => a -> Polynomial a -> Polynomial a
 (*^) lambda pol = lambda AlgMod.*> pol 
 
--- | variable x_i
+-- | Polynomial x_n
 lone :: (AlgRing.C a, Eq a) => Int -> Polynomial a
 lone n = M (Monomial AlgRing.one pows)
   where
@@ -148,7 +142,7 @@ lone n = M (Monomial AlgRing.one pows)
       else 
         S.replicate (n - 1) AlgAdd.zero |> AlgRing.one
 
--- | constant polynomial
+-- | Constant polynomial
 constant :: (AlgRing.C a, Eq a) => a -> Polynomial a
 constant x = M (Monomial x S.empty)
 
@@ -164,14 +158,11 @@ grow n monom = Monomial (coefficient monom) (growSequence (powers monom) n)
 nvariables :: Monomial a -> Int
 nvariables monom = S.length $ powers monom
 
--- | build a polynomial from a list of monomials
+-- Build a polynomial from a list of monomials
 fromListOfMonomials :: (AlgRing.C a, Eq a) => [Monomial a] -> Polynomial a
 fromListOfMonomials ms = if null ms
                             then Zero
                             else foldl1 (:+:) (map M ms)
-  -- where
-  --   n = maximum (map nvariables ms)
-  --   ms' = map (grow n) ms
 
 multMonomial :: (AlgRing.C a, Eq a) => Monomial a -> Monomial a -> Monomial a
 multMonomial (Monomial ca powsa) (Monomial cb powsb) =
@@ -181,7 +172,7 @@ multMonomial (Monomial ca powsa) (Monomial cb powsb) =
     powsa' = growSequence powsa n
     powsb' = growSequence powsb n
 
--- polynomial to list of monomials
+-- Polynomial to list of monomials
 toListOfMonomials :: (AlgRing.C a, Eq a) => Polynomial a -> [Monomial a]
 toListOfMonomials pol = case pol of
   Zero -> []
@@ -192,7 +183,7 @@ toListOfMonomials pol = case pol of
   where
     harmonize ms = map (grow (maximum (map nvariables ms))) ms
 
--- | list of terms of a polynomial 
+-- | List of the terms of a polynomial 
 terms :: (AlgRing.C a, Eq a) => Polynomial a -> [Monomial a]
 terms pol = case pol of
   Zero -> []
@@ -200,7 +191,7 @@ terms pol = case pol of
   p :+: q -> terms p ++ terms q
   p :*: q -> error "that should not happen"
 
--- polynomial to list of monomials, grouping the monomials with same powers
+-- Polynomial to list of monomials, grouping the monomials with same powers
 simplifiedListOfMonomials :: (AlgRing.C a, Eq a) => Polynomial a -> [Monomial a]
 simplifiedListOfMonomials pol = map (foldl1 addMonomials) groups
   where
@@ -212,7 +203,7 @@ simplifiedListOfMonomials pol = map (foldl1 addMonomials) groups
                               , powers = powers monoa
                               }
 
--- canonical form of a polynomial (sum of monomials with distinct powers)
+-- Canonical form of a polynomial (sum of monomials with distinct powers)
 toCanonicalForm :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a
 toCanonicalForm = fromListOfMonomials . simplifiedListOfMonomials
 
@@ -222,7 +213,7 @@ evalMonomial xyz monomial =
   where
     pows = toList (fromIntegral <$> powers monomial)
 
--- | evaluates a polynomial
+-- | Evaluates a polynomial
 evalPoly :: (AlgRing.C a, Eq a) => Polynomial a -> [a] -> a
 evalPoly pol xyz = case pol of
   Zero -> AlgAdd.zero
@@ -244,6 +235,7 @@ prettyPowers var pows = append (pack x) (cons '(' $ snoc string ')')
     x = " " ++ var ++ "^"
     string = intercalate (pack ", ") (map (pack . show) pows)
 
+-- | Pretty form of a polynomial
 prettyPol :: (AlgRing.C a, Eq a) => (a -> String) -> String -> Polynomial a -> String
 prettyPol prettyCoef var p = unpack $ intercalate (pack " + ") stringTerms
   where
