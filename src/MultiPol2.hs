@@ -7,6 +7,7 @@ module MultiPol2
   , compact
   , Monomial(..)
   , lone
+  , constant
   , terms
   -- , toListOfMonomials
   -- , simplifiedListOfMonomials
