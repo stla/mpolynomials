@@ -5,7 +5,7 @@ Simple multivariate polynomials in Haskell
 ___
 
 ```haskell
-import MultiPol
+import Math.Algebra.MultiPol
 x = lone 1 :: Polynomial Double
 y = lone 2 :: Polynomial Double
 z = lone 3 :: Polynomial Double
@@ -23,7 +23,7 @@ the instances `Eq` and `Algebra.Ring` (defined in the **numeric-prelude**
 library). For example `a = Rational`:
 
 ```haskell
-import MultiPol
+import Math.Algebra.MultiPol
 import Data.Ratio
 x = lone 1 :: Polynomial Rational
 y = lone 2 :: Polynomial Rational
@@ -37,7 +37,7 @@ z = lone 3 :: Polynomial Rational
 Or `a = Polynomial Double`:
 
 ```haskell
-import MultiPol
+import Math.Algebra.MultiPol
 p = lone 1 :: Polynomial Double
 x = lone 1 :: Polynomial (Polynomial Double)
 y = lone 2 :: Polynomial (Polynomial Double)
@@ -61,7 +61,7 @@ prettyPol (prettyPol show "a") "X" (poly ^**^ 2)
 Compact version:
 
 ```haskell
-import MultiPol
+import Math.Algebra.MultiPol
 import Prelude          hiding ((+), (*), (*>))
 import Algebra.Additive as AA
 import Algebra.Module   as AM
@@ -79,7 +79,7 @@ poly * poly    -- a²x² + 2a²xy + a²y²
 Evaluation:
 
 ```haskell
-import MultiPol
+import Math.Algebra.MultiPol
 x = lone 1 :: Polynomial Double
 y = lone 2 :: Polynomial Double
 z = lone 3 :: Polynomial Double

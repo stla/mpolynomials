@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-module MultiPol
+module Math.Algebra.MultiPol
   ( Polynomial() 
   , CompactPolynomial()
   , compact
