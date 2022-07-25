@@ -99,14 +99,17 @@ evalPoly poly [2, 1, 2]
 ___
 
 ```haskell
-import MultiPol2
+import MultiPol
 x = lone 1 :: Polynomial Double
 y = lone 2 :: Polynomial Double
 z = lone 3 :: Polynomial Double
-(2 *^ (x^**^3 ^*^ y ^*^ z) ^+^ (x^**^2)) ^*^ (4 *^ x ^*^ y ^*^ z)
+poly = (2 *^ (x^**^3 ^*^ y ^*^ z) ^+^ (x^**^2)) ^*^ (4 *^ x ^*^ y ^*^ z)
+poly
 -- M (Monomial {coefficient = 4.0, powers = fromList [3,1,1]}) 
 -- :+: 
 -- M (Monomial {coefficient = 8.0, powers = fromList [4,2,2]})
+prettyPol show "x" poly
+-- "(4.0) * x^(3, 1, 1) + (8.0) * x^(4, 2, 2)"
 ```
 
 More generally, one can use the type `Polynomial a` as long as the type `a` has 
@@ -114,7 +117,7 @@ the instances `Eq` and `Algebra.Ring` (defined in the **numeric-prelude**
 library). For example `a = Rational`:
 
 ```haskell
-import MultiPol2
+import MultiPol
 import Data.Ratio
 x = lone 1 :: Polynomial Rational
 y = lone 2 :: Polynomial Rational
@@ -128,13 +131,12 @@ z = lone 3 :: Polynomial Rational
 Or `a = Polynomial Double`:
 
 ```haskell
-import MultiPol2
+import MultiPol
 p = lone 1 :: Polynomial Double
-q = lone 2 :: Polynomial Double
 x = lone 1 :: Polynomial (Polynomial Double)
 y = lone 2 :: Polynomial (Polynomial Double)
-poly = (p *^ x) ^+^ (q *^ y)  
-poly ^*^ poly
+poly = (p *^ x) ^+^ (p *^ y)  
+poly ^**^ 2 
 -- (M (Monomial {
 --   coefficient = M (Monomial {coefficient = 1.0, powers = fromList [0,2]}), 
 --   powers = fromList [0,2]}) 
@@ -146,12 +148,14 @@ poly ^*^ poly
 --  M (Monomial {
 --    coefficient = M (Monomial {coefficient = 1.0, powers = fromList [2,0]}), 
 --    powers = fromList [2,0]})
+prettyPol (prettyPol show "a") "x" (poly ^**^ 2)
+-- "((1.0) * a^(2)) * x^(0, 2) + ((2.0) * a^(2)) * x^(1, 1) + ((1.0) * a^(2)) * x^(2, 0)"
 ```
 
 Compact version:
 
 ```haskell
-import MultiPol2
+import MultiPol
 import Prelude          hiding ((+), (*), (*>))
 import Algebra.Additive as AA
 import Algebra.Module   as AM
