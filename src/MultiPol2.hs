@@ -5,6 +5,7 @@ module MultiPol2
   ( Polynomial() 
   , CompactPolynomial()
   , compact
+  , Zero
   , Monomial(..)
   , lone
   , constant
