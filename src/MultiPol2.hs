@@ -5,8 +5,9 @@ module MultiPol2
   ( Polynomial() 
   , CompactPolynomial()
   , compact
-  -- , Monomial
+  , Monomial(..)
   , lone
+  , terms
   -- , toListOfMonomials
   -- , simplifiedListOfMonomials
   -- , fromListOfMonomials
@@ -19,18 +20,18 @@ module MultiPol2
   -- , derivPoly
   -- , monom
   , evalPoly
-  -- , polytest 
+  , polytest 
   )
   where
 import qualified Algebra.Additive as AlgAdd
 import qualified Algebra.Module   as AlgMod
 import qualified Algebra.Ring     as AlgRing
-import           Data.List        ( sortBy, groupBy )
+import           Data.Foldable    ( toList )
 import           Data.Function    ( on )
+import           Data.List        ( sortBy, groupBy )
 import qualified Data.Sequence    as S
-import           Data.Sequence    (Seq, (><), (|>))
-import           Data.Foldable    (toList)
-import           Data.Tuple.Extra ((&&&))
+import           Data.Sequence    ( Seq, (><), (|>) )
+import           Data.Tuple.Extra ( (&&&) )
 
 data Monomial a = Monomial 
   { 
@@ -148,7 +149,6 @@ lone n = M (Monomial AlgRing.one pows)
 constant :: (AlgRing.C a, Eq a) => a -> Polynomial a
 constant x = M (Monomial x S.empty)
 
-
 growSequence :: Seq Int -> Int -> Seq Int 
 growSequence s n = s >< t
   where 
@@ -178,7 +178,7 @@ multMonomial (Monomial ca powsa) (Monomial cb powsb) =
     powsa' = growSequence powsa n
     powsb' = growSequence powsb n
 
--- | polynomial to list of monomials
+-- polynomial to list of monomials
 toListOfMonomials :: (AlgRing.C a, Eq a) => Polynomial a -> [Monomial a]
 toListOfMonomials pol = case pol of
   Zero -> []
@@ -189,7 +189,15 @@ toListOfMonomials pol = case pol of
   where
     harmonize ms = map (grow (maximum (map nvariables ms))) ms
 
--- | polynomial to list of monomials, grouping the monomials with same powers
+-- | list of terms of a polynomial 
+terms :: (AlgRing.C a, Eq a) => Polynomial a -> [Monomial a]
+terms pol = case pol of
+  Zero -> []
+  M monomial -> [monomial]
+  p :+: q -> terms p ++ terms q
+  p :*: q -> error "that should not happen"
+
+-- polynomial to list of monomials, grouping the monomials with same powers
 simplifiedListOfMonomials :: (AlgRing.C a, Eq a) => Polynomial a -> [Monomial a]
 simplifiedListOfMonomials pol = map (foldl1 addMonomials) groups
   where
@@ -201,7 +209,7 @@ simplifiedListOfMonomials pol = map (foldl1 addMonomials) groups
                               , powers = powers monoa
                               }
 
--- | canonical form of a polynomial (sum of monomials with distinct powers)
+-- canonical form of a polynomial (sum of monomials with distinct powers)
 toCanonicalForm :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a
 toCanonicalForm = fromListOfMonomials . simplifiedListOfMonomials
 
@@ -217,7 +225,7 @@ evalPoly pol xyz = case pol of
   Zero -> AlgAdd.zero
   M mono -> evalMonomial xyz mono
   p :+: q -> evalPoly p xyz AlgAdd.+ evalPoly q xyz
-  p :*: q -> evalPoly p xyz AlgRing.* evalPoly q xyz
+  p :*: q -> error "that should not happen" --evalPoly p xyz AlgRing.* evalPoly q xyz
 
 
 
@@ -290,5 +298,10 @@ evalPoly pol xyz = case pol of
 -- evalFromListOfMonomials :: [Monomial] -> (Double, Double, Double) -> Double
 -- evalFromListOfMonomials monomials xyz = sum (map (evalMonomial xyz) monomials)
 
--- polytest :: Polynomial Double
--- polytest = (M (monom 2 [3,1,1]) :+: M (monom 1 [2,0,0])) :*: M (monom 5 [1,1,1])
+polytest :: Bool
+polytest = evalPoly poly [2, 3, 4] == 18816.0
+  where
+    x = lone 1 :: Polynomial Double
+    y = lone 2 :: Polynomial Double
+    z = lone 3 :: Polynomial Double
+    poly = (2 *^ (x^**^3 ^*^ y ^*^ z) ^+^ (x^**^2)) ^*^ (4 *^ x ^*^ y ^*^ z)
