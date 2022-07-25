@@ -144,6 +144,11 @@ lone n = M (Monomial AlgRing.one pows)
       else 
         S.replicate (n - 1) AlgAdd.zero |> AlgRing.one
 
+-- | constant polynomial
+constant :: (AlgRing.C a, Eq a) => a -> Polynomial a
+constant x = M (Monomial x S.empty)
+
+
 growSequence :: Seq Int -> Int -> Seq Int 
 growSequence s n = s >< t
   where 
