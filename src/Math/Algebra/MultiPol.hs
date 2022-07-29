@@ -3,8 +3,6 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 module Math.Algebra.MultiPol
   ( Polynomial() 
-  , CompactPolynomial()
-  , compact
   , Monomial(..)
   , lone
   , constant
@@ -16,7 +14,6 @@ module Math.Algebra.MultiPol
   , (^**^)
   , evalPoly
   , prettyPol
-  , polytest 
   )
   where
 import qualified Algebra.Additive as AlgAdd
@@ -29,6 +26,15 @@ import qualified Data.Sequence    as S
 import           Data.Sequence    ( Seq, (><), (|>) )
 import           Data.Text        ( Text, pack, intercalate, cons, snoc, append, unpack )
 import           Data.Tuple.Extra ( (&&&) )
+
+infixr 7 *^
+
+infixl 6 ^+^, ^-^
+
+infixl 7 ^*^ 
+
+infixr 8 ^**^
+
 
 data Monomial a = Monomial 
   { 
@@ -53,26 +59,6 @@ instance (AlgRing.C a, Eq a) => AlgMod.C a (Polynomial a) where
 instance (AlgRing.C a, Eq a) => AlgRing.C (Polynomial a) where
   p * q = multiplyPols p q
   one = lone 0
-
-newtype CompactPolynomial a = Compact (Polynomial a)
-  deriving (Eq)
-instance (Eq a, Show a, AlgRing.C a) => Show (CompactPolynomial a) where
-  show p = show $ map (coefficient &&& (toList . powers)) (toListOfMonomials $ fromCompact p)
-instance (AlgRing.C a, Eq a) => AlgAdd.C (CompactPolynomial a) where
-  p + q = compact $ fromCompact p ^+^ fromCompact q
-  zero = compact Zero
-  negate = compact . negatePol . fromCompact
-instance (AlgRing.C a, Eq a) => AlgMod.C a (CompactPolynomial a) where
-  lambda *> p = compact $ lambda *^ fromCompact p
-instance (AlgRing.C a, Eq a) => AlgRing.C (CompactPolynomial a) where
-  p * q = compact $ fromCompact p ^*^ fromCompact q
-  one = compact $ lone 0
-
-fromCompact :: CompactPolynomial a -> Polynomial a
-fromCompact (Compact p) = p 
-
-compact :: Polynomial a -> CompactPolynomial a
-compact = Compact  
 
 addPolys :: (AlgRing.C a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
 addPolys p q = toCanonicalForm $ p :+: q
@@ -220,14 +206,6 @@ evalPoly pol xyz = case pol of
   M mono -> evalMonomial xyz mono
   p :+: q -> evalPoly p xyz AlgAdd.+ evalPoly q xyz
   p :*: q -> error "that should not happen" --evalPoly p xyz AlgRing.* evalPoly q xyz
-
-polytest :: Bool
-polytest = evalPoly poly [2, 3, 4] == 18816.0
-  where
-    x = lone 1 :: Polynomial Double
-    y = lone 2 :: Polynomial Double
-    z = lone 3 :: Polynomial Double
-    poly = (2 *^ (x^**^3 ^*^ y ^*^ z) ^+^ (x^**^2)) ^*^ (4 *^ x ^*^ y ^*^ z)
 
 prettyPowers :: String -> [Int] -> Text
 prettyPowers var pows = append (pack x) (cons '(' $ snoc string ')') 
