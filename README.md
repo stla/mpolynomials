@@ -9,7 +9,7 @@ import Math.Algebra.MultiPol
 x = lone 1 :: Polynomial Double
 y = lone 2 :: Polynomial Double
 z = lone 3 :: Polynomial Double
-poly = (2 *^ (x^**^3 ^*^ y ^*^ z) ^+^ (x^**^2)) ^*^ (4 *^ x ^*^ y ^*^ z)
+poly = (2 *^ (x^**^3 ^*^ y ^*^ z) ^+^ x^**^2) ^*^ (4 *^ (x ^*^ y ^*^ z))
 poly
 -- M (Monomial {coefficient = 4.0, powers = fromList [3,1,1]}) 
 -- :+: 
@@ -28,7 +28,7 @@ import Data.Ratio
 x = lone 1 :: Polynomial Rational
 y = lone 2 :: Polynomial Rational
 z = lone 3 :: Polynomial Rational
-((2%3) *^ (x^**^3 ^*^ y ^*^ z) ^+^ (x^**^2)) ^*^ ((7%4) *^ x ^*^ y ^*^ z)
+((2%3) *^ (x^**^3 ^*^ y ^*^ z) ^+^ x^**^2) ^*^ ((7%4) *^ (x ^*^ y ^*^ z))
 -- M (Monomial {coefficient = 7 % 4, powers = fromList [3,1,1]}) 
 -- :+: 
 -- M (Monomial {coefficient = 7 % 6, powers = fromList [4,2,2]})
@@ -65,7 +65,7 @@ import Math.Algebra.MultiPol
 x = lone 1 :: Polynomial Double
 y = lone 2 :: Polynomial Double
 z = lone 3 :: Polynomial Double
-poly = 2 *^ x ^*^ y ^*^ z 
+poly = 2 *^ (x ^*^ y ^*^ z) 
 -- evaluate poly at x=2, y=1, z=2
 evalPoly poly [2, 1, 2]
 -- 8.0
