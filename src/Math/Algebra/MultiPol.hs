@@ -92,7 +92,7 @@ multiplyPols p q = toCanonicalForm $ p :*: q
 
 -- | Power of a polynomial
 (^**^) :: (AlgRing.C a, Eq a) => Polynomial a -> Int -> Polynomial a
-(^**^) p n = foldl1 (^*^) (replicate n p) 
+(^**^) p n = AlgRing.product (replicate n p) 
 
 scalePol :: (AlgRing.C a, Eq a) => a -> Polynomial a -> Polynomial a
 scalePol lambda pol = if lambda == AlgAdd.zero

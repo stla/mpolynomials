@@ -1,5 +1,5 @@
 name:                mpolynomials
-version:             0.1.0.1
+version:             0.1.1.0
 synopsis:            Simple multivariate polynomials.
 description:         Manipulation of multivariate polynomials on a ring.
 homepage:            https://github.com/stla/mpolynomials#readme
