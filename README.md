@@ -1,8 +1,11 @@
 # mpolynomials
 
-Simple multivariate polynomials in Haskell
+Simple multivariate polynomials in Haskell.
+
+*This package won't be developed anymore*. Please use [**hspray**](https://github.com/stla/hspray).
 
 ___
+
 
 ```haskell
 import Math.Algebra.MultiPol
